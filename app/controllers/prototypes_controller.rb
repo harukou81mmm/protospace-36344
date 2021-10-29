@@ -1,8 +1,8 @@
 class PrototypesController < ApplicationController
-  before_action :move_to_index,  except: [:index, :show]
-  
+  before_action :move_to_index, except: [:index, :show, :edit]
+  before_action :set_prototype, only: [:edit, :show]
   def index
-    @prototypes = Prototype.all
+    @prototypes = Prototype.includes(:user).order("created_at DESC")
   end
 
   def new
@@ -11,38 +11,36 @@ class PrototypesController < ApplicationController
 
   def create
     @prototype = Prototype.new(prototype_params)
-    if @prototype.save
-      redirect_to root_path(@prototype)
+    if prototype.create(prototype_params)
+      redirect_to root_path
     else
-      render :new
-      @prototype = Prototype.includes(:user)
+      render :edit
     end
   end
 
   def show
-    @prototype = Prototype.find(params[:id])
     @comment = Comment.new
     @comments = @prototype.comments.includes(:user)
   end
 
   def edit
-    @prototype = Prototype.find(params[:id])
   end
 
   def update
-    @prototype = Prototype.find(params[:id])
-    if @prototype.save
-      prototype.update(prototype_params)
-      redirect_to root_path
+    prototype = Prototype.find(params[:id])
+    if prototype.update(prototype_params)
+      redirect_to prototype_path
     else
-      render  :edit
+      render :edit
     end
+
   end
 
   def destroy
     prototype = Prototype.find(params[:id])
-    prototype.destroy
+    if prototype.destroy
     redirect_to root_path
+    end
   end
 
   private
@@ -53,28 +51,12 @@ class PrototypesController < ApplicationController
 
   def move_to_index
     unless user_signed_in?
-     redirect_to action: :index
-    end
-  end
-
-
-  def move_to_edit
-    unless user_signed_in?
       redirect_to action: :index
     end
   end
 
-  def move_to_update
-    unless user_signed_in?
-      redirect_to action: :index
-    end
+  def set_prototype
+    @prototype = Prototype.find(params[:id])
   end
-
-  def move_to_destroy
-    unless user_signed_in?
-      redirect_to action: :index
-    end
-  end
-  
 
 end

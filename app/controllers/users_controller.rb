@@ -1,12 +1,17 @@
 class UsersController < ApplicationController
+  before_action :move_to_index, except: [:index, :show]
+
+
+  def index
+  end
+
+  def new
+    @user = User.new 
+  end
 
   def show
     @user = User.find(params[:id])
-    @name = current_user.name
-    @prototypes = current_user.prototypes
-    @profile = current_user.profile
-    @occupation = current_user.occupation
-    @position = current_user.position
+    @prototypes = @user.prototypes
   end
 
   def edit
@@ -14,6 +19,12 @@ class UsersController < ApplicationController
 
   def update
     current_user.update(user_params)
+  end
+
+  def move_to_index
+    unless user_signed_in?
+      redirect_to action: :index
+    end
   end
 
   private
