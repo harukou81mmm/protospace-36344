@@ -1,5 +1,6 @@
 class PrototypesController < ApplicationController
-  before_action :move_to_index, except: [:index, :show, :edit]
+  before_action :authenticate_user!, only: [:new, :destroy, :update]
+  before_action :move_to_index, except: [:index, :show]
   before_action :set_prototype, only: [:edit, :show]
   def index
     @prototypes = Prototype.includes(:user).order("created_at DESC")
@@ -11,10 +12,10 @@ class PrototypesController < ApplicationController
 
   def create
     @prototype = Prototype.new(prototype_params)
-    if prototype.create(prototype_params)
-      redirect_to root_path
+    if @prototype.save
+      redirect_to root_path(prototype_params)
     else
-      render :edit
+      render :index
     end
   end
 
@@ -31,7 +32,7 @@ class PrototypesController < ApplicationController
     if prototype.update(prototype_params)
       redirect_to prototype_path
     else
-      render :edit
+      render :index
     end
 
   end
